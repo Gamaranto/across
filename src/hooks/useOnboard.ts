@@ -33,9 +33,11 @@ export function useOnboard() {
               const provider = new ethers.providers.Web3Provider(
                 wallet.provider
               );
+              const signer = provider.getSigner();
 
               update({
                 provider,
+                signer,
               });
             }
           },

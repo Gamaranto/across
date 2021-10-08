@@ -9,6 +9,7 @@ import {
   update,
   error as errorAction,
 } from "./connection";
+import { transactions } from "./global";
 
 import { transfer, toggle } from "./transfers";
 
@@ -36,7 +37,7 @@ export function useSelectedSendArgs() {
 }
 
 export function useConnection() {
-  const { account, provider, signer, error, connector, chainId, isConnected } =
+  const { account, provider, error, connector, chainId, isConnected } =
     useAppSelector((state) => state.connection);
   const dispatch = useAppDispatch();
   const actions = bindActionCreators(
@@ -60,7 +61,7 @@ export function useConnection() {
     chainId,
     connector,
     error,
-    signer,
+    signer: provider?.getSigner(),
     isConnected,
     setError: actions.errorAction,
     update: setUpdate,
@@ -70,7 +71,10 @@ export function useConnection() {
 }
 
 export function useGlobal() {
-  return useAppSelector((state) => state.global);
+  const state = useAppSelector((state) => state.global);
+  const dispatch = useAppDispatch();
+  const actions = bindActionCreators({ transactions }, dispatch);
+  return { ...state, addTransaction: actions.transactions };
 }
 
 export function useAccounts() {
@@ -86,4 +90,4 @@ export function useTransfers() {
   return { ...state, addTransfer, toggleShowLatestTransfer };
 }
 
-export { useBalances, useETHBalance } from "./chain";
+export * from "./chain";

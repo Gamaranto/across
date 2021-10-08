@@ -40,8 +40,8 @@ const connectionSlice = createSlice({
     },
     update: (state, action: PayloadAction<Omit<State, "isConnected">>) => {
       state.provider = action.payload.provider ?? state.provider;
-      state.account = action.payload.account ?? state.account;
       state.signer = action.payload.signer ?? state.signer;
+      state.account = action.payload.account ?? state.account;
       state.chainId = action.payload.chainId ?? state.chainId;
       return state;
     },

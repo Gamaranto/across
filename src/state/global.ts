@@ -10,10 +10,9 @@ type Account = {
   transactions: Record<string, Transaction>;
   balances: Record<string, ethers.BigNumber>;
 };
+
 type ChainState = {
   accounts: Record<string, Account>;
-  balances: Record<string, ethers.BigNumber>;
-  transactions: Record<string, Transaction>;
 };
 type State = {
   currentChainId: number;
@@ -27,29 +26,18 @@ const initialState: State = {
   chains: {
     1: {
       accounts: {},
-      transactions: {},
-      balances: {},
     },
     42: {
       accounts: {},
-      transactions: {},
-      balances: {},
     },
     10: {
       accounts: {},
-      transactions: {},
-      balances: {},
     },
     69: {
       accounts: {},
-      transactions: {},
-      balances: {},
     },
-
     1337: {
       accounts: {},
-      transactions: {},
-      balances: {},
     },
   },
 };
@@ -119,16 +107,8 @@ const globalSlice = createSlice({
       .addMatcher(
         (action) => action.type === update.type,
         (state, action: ReturnType<typeof update>) => {
-          const { signer, provider } = action.payload;
-          if (signer) {
-            state.chains[state.currentChainId].accounts[state.currentAccount] =
-              {
-                ...state.chains[state.currentChainId].accounts[
-                  state.currentAccount
-                ],
-                signer,
-              };
-          }
+          const { provider, signer } = action.payload;
+
           if (provider) {
             state.chains[state.currentChainId].accounts[state.currentAccount] =
               {
@@ -136,6 +116,15 @@ const globalSlice = createSlice({
                   state.currentAccount
                 ],
                 provider,
+              };
+          }
+          if (signer) {
+            state.chains[state.currentChainId].accounts[state.currentAccount] =
+              {
+                ...state.chains[state.currentChainId].accounts[
+                  state.currentAccount
+                ],
+                signer,
               };
           }
           return state;

@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 
 type SelectedSendArgsState = {
   address?: string;
-  amount?: ethers.BigNumberish;
+  amount: ethers.BigNumber;
   fromChain: number;
   toChain: number;
   asset: string;
@@ -12,7 +12,8 @@ type SelectedSendArgsState = {
 
 const initialState: SelectedSendArgsState = {
   fromChain: 69,
-  toChain: 1,
+  toChain: 42,
+  amount: ethers.BigNumber.from(0),
   asset: ethers.constants.AddressZero,
 };
 
