@@ -1,9 +1,10 @@
 import { ethers } from "ethers";
-import { CHAINS } from "utils";
 
-export async function switchToChain(
+import { CHAINS, ChainId } from "./constants";
+
+export async function switchChain(
   provider: ethers.providers.JsonRpcProvider,
-  chainId: number
+  chainId: ChainId
 ) {
   try {
     await provider.send("wallet_switchEthereumChain", [
@@ -34,17 +35,6 @@ export async function switchToChain(
   }
 }
 
-export function networkFromChainId(chainId: number) {
-  switch (chainId) {
-    case 1:
-      return "mainnet";
-    case 42:
-      return "kovan";
-    case 10:
-      return "optimism";
-    case 69:
-      return "kovan optimism";
-    default:
-      return "unknown";
-  }
+export function isSupportedChainId(chainId: number): chainId is ChainId {
+  return chainId in ChainId;
 }

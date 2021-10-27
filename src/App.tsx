@@ -1,38 +1,46 @@
 import React from "react";
-
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { Header, Wallet } from "./components";
-import { Send, Pool, About } from "views";
-import { useOnboard } from "hooks";
-import { useConnection, useETHBalance } from "state/hooks";
-import { formatEther } from "utils";
+import { Switch, BrowserRouter as Router, Route } from "react-router-dom";
+import { Send, Pool, About, Confirmation } from "views";
+import { Header, SuperHeader } from "components";
+import { useConnection, useDeposits, useSend } from "state/hooks";
+import {
+  DEFAULT_FROM_CHAIN_ID,
+  CHAINS,
+  UnsupportedChainIdError,
+  switchChain,
+} from "utils";
 
 function App() {
-  const { account, chainId } = useConnection();
-  const { init } = useOnboard();
-  const { data: balance } = useETHBalance(
-    { account: account ?? "", chainId: chainId ?? 1 },
-    { skip: !account && !chainId }
-  );
+  const { fromChain } = useSend();
+  const { showConfirmationScreen } = useDeposits();
+  const { error, provider, chainId } = useConnection();
 
+  const wrongNetwork =
+    provider &&
+    (error instanceof UnsupportedChainIdError || chainId !== fromChain);
   return (
     <Router>
-      <Header>
-        <Wallet
-          account={account}
-          balance={formatEther(balance ?? 0)}
-          chainId={chainId}
-          onWalletConnect={init}
-        />
-      </Header>
-
+      {wrongNetwork && (
+        <SuperHeader>
+          <div>
+            You are on the wrong network. Please{" "}
+            <button onClick={() => switchChain(provider, fromChain)}>
+              switch to {CHAINS[DEFAULT_FROM_CHAIN_ID].name}
+            </button>
+          </div>
+        </SuperHeader>
+      )}
+      <Header />
       <Switch>
-        <Route exact path="/" component={Send} />
+        <Route
+          exact
+          path="/"
+          component={showConfirmationScreen ? Confirmation : Send}
+        />
         <Route path="/pool" component={Pool} />
         <Route path="/about" component={About} />
       </Switch>
     </Router>
   );
 }
-
 export default App;

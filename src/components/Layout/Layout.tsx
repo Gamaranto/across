@@ -1,36 +1,24 @@
+import React from "react";
 import styled from "@emotion/styled";
-import MaxWidthWrapper from "../MaxWidthWrapper";
+import { COLORS } from "utils";
 
-const Layout: React.FC = ({ children }) => {
-  return (
-    <Bg>
-      <MaxWidth size="sm">
-        <Wrapper>{children}</Wrapper>
-      </MaxWidth>
-    </Bg>
-  );
-};
-const Bg = styled.main`
-  position: relative;
-  height: 100%;
-
-  background-image: linear-gradient(
-    to right,
-    var(--gray) 18%,
-    var(--primary),
-    var(--gray) 82%
-  );
-`;
-
-const MaxWidth = styled(MaxWidthWrapper)`
-  height: 100%;
-`;
-const Wrapper = styled.section`
-  background-color: var(--gray);
-  color: var(--white);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-`;
+const Layout: React.FC = ({ children }) => (
+  <Wrapper>
+    <Main>{children}</Main>
+  </Wrapper>
+);
 
 export default Layout;
+
+const Wrapper = styled.div`
+  display: grid;
+  padding: 0 30px;
+  grid-template-columns: 1fr var(--central-content) 1fr;
+  height: 100%;
+`;
+
+const Main = styled.main`
+  grid-column: 2;
+  box-shadow: 0 0 120px hsla(${COLORS.primary[500]} / 0.25);
+  clip-path: inset(0px -160px 0px -160px);
+`;

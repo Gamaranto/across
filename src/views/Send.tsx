@@ -1,22 +1,19 @@
 import React from "react";
-import { Confirmation, SendForm, Layout } from "components";
-import { useTransfers } from "state/hooks";
+import {
+  Layout,
+  ChainSelection,
+  CoinSelection,
+  AddressSelection,
+  SendAction,
+} from "components";
 
 const Send: React.FC = () => {
-  const {
-    showLatestTransfer,
-    latestTransfer,
-    toggleShowLatestTransfer,
-    addTransfer,
-  } = useTransfers();
-
   return (
     <Layout>
-      {showLatestTransfer && latestTransfer ? (
-        <Confirmation onClose={toggleShowLatestTransfer} {...latestTransfer} />
-      ) : (
-        <SendForm onSend={addTransfer} />
-      )}
+      <ChainSelection />
+      <CoinSelection />
+      <AddressSelection />
+      <SendAction />
     </Layout>
   );
 };

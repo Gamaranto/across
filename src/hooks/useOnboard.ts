@@ -1,64 +1,73 @@
 import React from "react";
-import { Wallet } from "bnc-onboard/dist/src/interfaces";
 import Onboard from "bnc-onboard";
+import { Wallet } from "bnc-onboard/dist/src/interfaces";
 import { ethers } from "ethers";
-
-import { useConnection } from "../state/hooks";
-import { onboardBaseConfig } from "../utils/constants";
-import { UnsupportedChainIdError, isValidChainId } from "../utils/chainId";
+import {
+  onboardBaseConfig,
+  UnsupportedChainIdError,
+  isSupportedChainId,
+} from "utils";
+import { useConnection } from "state/hooks";
 
 export function useOnboard() {
-  const { connect, disconnect, update, setError } = useConnection();
+  const { disconnect, setUpdate, setError } = useConnection();
+
   const instance = React.useMemo(
     () =>
       Onboard({
-        ...onboardBaseConfig(10),
+        ...onboardBaseConfig(),
         subscriptions: {
           address: (address: string) => {
-            update({ account: address });
+            setUpdate({ account: address });
           },
-          network: (networkId: number) => {
-            const error = isValidChainId(networkId)
-              ? undefined
-              : new UnsupportedChainIdError(networkId);
-            update({
-              chainId: networkId,
-            });
-            if (error) {
-              setError(error);
+          network: (chainIdInHex) => {
+            if (chainIdInHex == null) {
+              return;
+            }
+            const chainId = ethers.BigNumber.from(chainIdInHex).toNumber();
+
+            if (!isSupportedChainId(chainId)) {
+              setError({ error: new UnsupportedChainIdError(chainId) });
+            } else {
+              setUpdate({ chainId });
             }
           },
-          wallet: async (wallet: Wallet) => {
-            if (wallet.provider) {
+          wallet: (wallet: Wallet) => {
+            if (wallet?.provider?.selectedAddress) {
               const provider = new ethers.providers.Web3Provider(
                 wallet.provider
               );
-
-              update({
-                provider,
-              });
+              const signer = provider.getSigner();
+              const chainId = ethers.BigNumber.from(
+                wallet.provider.chainId
+              ).toNumber();
+              if (!isSupportedChainId(chainId)) {
+                setError({ error: new UnsupportedChainIdError(chainId) });
+              } else {
+                setUpdate({
+                  account: wallet.provider.selectedAddress,
+                  chainId,
+                  provider,
+                  signer,
+                });
+              }
+            } else {
+              disconnect();
             }
           },
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [setUpdate, setError, disconnect]
   );
+
   const init = React.useCallback(async () => {
     try {
       await instance.walletSelect();
       await instance.walletCheck();
-      const state = instance.getState();
-      connect({
-        connector: instance,
-        chainId: state.network,
-        account: state.address,
-        provider: new ethers.providers.Web3Provider(state.wallet.provider),
-      });
-    } catch (err: unknown) {
-      setError(err as Error);
+    } catch (error: unknown) {
+      setError({ error: new Error("Could not initialize Onboard.") });
     }
-  }, [connect, instance, setError]);
+  }, [instance, setError]);
   const reset = React.useCallback(() => {
     instance.walletReset();
     disconnect();

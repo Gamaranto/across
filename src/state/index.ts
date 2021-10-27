@@ -1,21 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query/react";
-
-import selectedSendArgsReducer from "./selectedSendArgs";
 import connectionReducer from "./connection";
-import globalReducer from "./global";
-import transfersReducer from "./transfers";
-import chainApi from "./chain";
+import sendReducer from "./send";
+import chainApi from "./chainApi";
+import transactionsReducer from "./transactions";
+import depositsReducer from "./deposits";
 
 export const store = configureStore({
   reducer: {
-    selectedSendArgs: selectedSendArgsReducer,
     connection: connectionReducer,
-    global: globalReducer,
-    transfers: transfersReducer,
+    send: sendReducer,
+    transactions: transactionsReducer,
+    deposits: depositsReducer,
     [chainApi.reducerPath]: chainApi.reducer,
   },
-  devTools: true,
   middleware: (getDefaultMiddleWare) =>
     getDefaultMiddleWare({ serializableCheck: false }).concat(
       chainApi.middleware
